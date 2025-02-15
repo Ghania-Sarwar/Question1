@@ -1,0 +1,73 @@
+package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+const capacity = 100
+
+// Queue struct for managing the path components
+type Queue struct {
+	size  int
+	data  [capacity]string
+	front int
+	back  int
+}
+
+func (q *Queue) Enqueue(value string) {
+	if q.size >= capacity {
+		return
+	}
+	q.size++
+	q.data[q.back] = value
+	q.back = (q.back + 1) % capacity
+}
+
+func (q *Queue) Dequeue() string {
+	if q.size <= 0 {
+		return ""
+	}
+	q.size--
+	value := q.data[q.front]
+	q.front = (q.front + 1) % capacity
+	return value
+}
+
+func (q *Queue) IsEmpty() bool {
+	return q.size == 0
+}
+
+
+func conversion(currentDir, relativePath string) string {
+	que := Queue{} 
+
+
+	for _, ch := range strings.Split(currentDir, "/") {
+		if ch != "" {
+			que.Enqueue(ch)
+		}
+	}
+
+
+	for _, ch := range strings.Split(relativePath, "/") {
+		switch ch {
+		case ".", "": 
+			continue
+		case "..":
+			if !que.IsEmpty() { 
+				que.Dequeue()
+			}
+		default:
+			que.Enqueue(ch) 
+		}
+	}
+
+
+	var absolutePath []string
+	for !que.IsEmpty() {
+		absolutePath = append(absolutePath, que.Dequeue())
+	}
+
+	return "/" + strings.Join(absolutePath, "/")
+}
